@@ -633,7 +633,6 @@
 	currentTile = [[[TKCalendarMonthTiles alloc] initWithMonth:[[NSDate date] firstOfMonth] marks:nil startDayOnSunday:sunday] autorelease];
 	[currentTile setTarget:self action:@selector(tile:)];
 	
-	[currentTile setTarget:self action:@selector(tile:)];
 	CGRect r = CGRectMake(0, 0, self.tileBox.bounds.size.width, self.tileBox.bounds.size.height + self.tileBox.frame.origin.y);
 
 	
@@ -660,7 +659,18 @@
 	NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
 	[dateFormat setDateFormat:@"eee"];
 	[dateFormat setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-	
+    if ([[MBPConfigurator sharedInstance] useEnglish]) {
+        // English
+        NSLocale *usLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+        [dateFormat setLocale:usLocale];
+        [usLocale release];
+    } else {
+        // Spanish
+        NSLocale *usLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"es_US"];
+        [dateFormat setLocale:usLocale];
+        [usLocale release];
+    }
+
 	
 	TKDateInformation sund;
 	sund.day = 5;

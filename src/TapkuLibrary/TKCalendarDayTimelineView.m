@@ -194,7 +194,8 @@
 		}
 	}
 	
-	NSDateFormatter *format = [[NSDateFormatter alloc]init];
+	NSDateFormatter *format = [[NSDateFormatter alloc] init];
+
 	[format setDateFormat:@"EEEE  dd MM yyyy"];	
 	NSString *displayDate = [format stringFromDate:_currentDay];
 	self.monthYear.text = displayDate;
@@ -311,6 +312,20 @@
 	}
 	NSDateFormatter *format = [[NSDateFormatter alloc]init];
 	[format setDateFormat:@"HH:mm"];
+    if ([[MBPConfigurator sharedInstance] useEnglish]) {
+        // English
+        NSLocale *usLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+        [format setLocale:usLocale];
+        [format setTimeZone:[NSTimeZone timeZoneWithName:@"AST"]];
+        [usLocale release];
+    } else {
+        // Spanish
+        NSLocale *usLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"es_US"];
+        [format setLocale:usLocale];
+        [format setTimeZone:[NSTimeZone timeZoneWithName:@"AST"]];
+        [usLocale release];
+    }
+
 	NSDate *timeTapped = [format dateFromString:[NSString stringWithFormat:@"%i:%i", intHour, intMinute]];
 	[format release];
 	return [NSDate dateWithDatePart:self.currentDay andTimePart:timeTapped];

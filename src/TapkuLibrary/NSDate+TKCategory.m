@@ -140,6 +140,7 @@
 + (NSDate *) dateWithDatePart:(NSDate *)aDate andTimePart:(NSDate *)aTime {
 	NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
 	[dateFormatter setDateFormat:@"dd/MM/yyyy"];
+    
 	NSString *datePortion = [dateFormatter stringFromDate:aDate];
 	
 	[dateFormatter setDateFormat:@"HH:mm"];
@@ -155,11 +156,35 @@
 - (NSString*) monthString{
 	NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];	
 	[dateFormatter setDateFormat:@"MMMM"];
+    
+    if ([[MBPConfigurator sharedInstance] useEnglish]) {
+        // English
+        NSLocale *usLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+        [dateFormatter setLocale:usLocale];
+        [usLocale release];
+    } else {
+        // Spanish
+        NSLocale *usLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"es_US"];
+        [dateFormatter setLocale:usLocale];
+        [usLocale release];
+    }
+    
 	return [dateFormatter stringFromDate:self];
 }
 - (NSString*) yearString{
 	NSDateFormatter *dateFormatter = [[[NSDateFormatter alloc] init] autorelease];	
 	[dateFormatter setDateFormat:@"yyyy"];
+    if ([[MBPConfigurator sharedInstance] useEnglish]) {
+        // English
+        NSLocale *usLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+        [dateFormatter setLocale:usLocale];
+        [usLocale release];
+    } else {
+        // Spanish
+        NSLocale *usLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"es_US"];
+        [dateFormatter setLocale:usLocale];
+        [usLocale release];
+    }
 	return [dateFormatter stringFromDate:self];
 }
 
