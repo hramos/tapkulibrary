@@ -123,9 +123,8 @@
 #pragma mark Execut Method When Notification Fire
 
 //help executing a method when a notification fire
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-	[self performSelector: (SEL)context withObject: change];
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
+	[self performSelector:(SEL)context withObject:change];
 } 
 
 #pragma mark -
@@ -184,7 +183,7 @@
 	// Make it today
 	if (!self.currentDay) {
 		// Dont' want to inform the observer
-		_currentDay = [[NSDate date]retain];
+		_currentDay = [NSDate date];
 	}
 	
 	// Remove all previous view event
@@ -199,7 +198,6 @@
 	[format setDateFormat:@"EEEE  dd MM yyyy"];	
 	NSString *displayDate = [format stringFromDate:_currentDay];
 	self.monthYear.text = displayDate;
-	[format release];
 	
 	// Ask the delgate about the events that correspond
 	// the the currently displayed day view
@@ -295,7 +293,6 @@
 				NSLog(@"hourStart: %d minuteStart: %d", hourStart, minuteStart);
 			}
 		}
-		[sameTimeEvents release];
 	}	
 }
 
@@ -327,7 +324,6 @@
     }
 
 	NSDate *timeTapped = [format dateFromString:[NSString stringWithFormat:@"%i:%i", intHour, intMinute]];
-	[format release];
 	return [NSDate dateWithDatePart:self.currentDay andTimePart:timeTapped];
 }
 
@@ -392,7 +388,7 @@
 
 - (UIButton *) leftArrow{
 	if(leftArrow==nil){
-		leftArrow = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+		leftArrow = [UIButton buttonWithType:UIButtonTypeCustom];
 		leftArrow.tag = 0;
 		[leftArrow addTarget:self action:@selector(previousDay:) forControlEvents:UIControlEventTouchUpInside];
 		
@@ -407,7 +403,7 @@
 }
 - (UIButton *) rightArrow{
 	if(rightArrow==nil){
-		rightArrow = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+		rightArrow = [UIButton buttonWithType:UIButtonTypeCustom];
 		rightArrow.tag = 1;
 		[rightArrow addTarget:self action:@selector(nextDay:) forControlEvents:UIControlEventTouchUpInside];
 		rightArrow.frame = CGRectMake(320-45, 3, 48, 38);
@@ -434,21 +430,9 @@
 	// Remove observers
 	[self removeObserver:self forKeyPath: @"currentDay"];
 	
-	[_currentDay release];
-	[_events release];
-	[_timelineView release];
-	[_scrollView release];
 
-	[timelineColor release];
-	[hourColor release];
 	
-	[rightArrow release];
-	[leftArrow release];
-	[topBackground release];
-	[shadow release];
-	[monthYear release];
 	
-    [super dealloc];
 }
 
 
@@ -685,13 +669,6 @@
 #pragma mark -
 #pragma mark Dealloc
 
-- (void)dealloc {
-	[_times release];
-	[_periods release];
-	[hourColor release];
-	
-    [super dealloc];
-}
 
 
 @end

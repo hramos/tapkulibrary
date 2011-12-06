@@ -1,6 +1,6 @@
 //
 //  TKViewController.m
-//  Created by Devin Ross on 11/24/10.
+//  Created by Devin Ross on 11/1/11.
 //
 /*
  
@@ -30,32 +30,152 @@
  */
 
 #import "TKViewController.h"
-#import "TKNavigationController.h"
+#import "TKHTTPRequest.h"
+#import "NSArray+TKCategory.h"
 
 @implementation TKViewController
-@synthesize customNavigationItem = _customNavigationItem;
+@synthesize loadingView = _loadingView;
 
-
-
-- (id) init{
-	if(!(self=[super init])) return nil;
-	_customNavigationItem = [[TKNavigationItem alloc] initWithTitle:[super navigationItem].title];
-	_customNavigationItem.leftBarButtonItem = [super navigationItem].leftBarButtonItem;
-	_customNavigationItem.rightBarButtonItem = [super navigationItem].rightBarButtonItem;
-	return self;
+- (void) viewDidUnload{
+	self.loadingView = nil;
+	[super viewDidUnload];
 }
-- (void)dealloc {
-	[_customNavigationItem release];
-    [super dealloc];
+- (void) dealloc{
+	
+	if(_activeRequests){
+		for(TKHTTPRequest *request in _activeRequests)
+			[request cancel];
+	}
+	
+}
+
+#pragma mark - EASILY MANAGE ACTIVE REQUESTS
+- (void) addActiveRequest:(TKHTTPRequest*)request{
+	
+	if(_activeRequests==nil){
+		_activeRequests = [[NSMutableArray alloc] init];
+	}
+	[_activeRequests addObject:request];
+	
+}
+- (void) removeActiveRequest:(TKHTTPRequest*)request{
+	
+	if([_activeRequests containsObject:request])
+		[_activeRequests removeObject:request];
 }
 
 
-- (void) setTitle:(NSString *)t{
-	[super setTitle:t];
-	self.customNavigationItem.title = t;
+#pragma mark - PROCESS JSON IN THE BACKGROUND
+
+- (void) processJSONDataInBackground:(NSData *)data withCallbackSelector:(SEL)callback{
+	
+	[self processJSONDataInBackground:data 
+				 withCallbackSelector:callback 
+				   backgroundSelector:nil 
+						errorSelector:nil 
+					   readingOptions:0];
+	
 }
-- (UINavigationItem *) navigationItem{	
-   return (self.customNavigationItem)?(self.customNavigationItem):([super navigationItem]);
+
+- (void) processJSONDataInBackground:(NSData *)data withCallbackSelector:(SEL)callback readingOptions:(NSJSONReadingOptions)options{
+	
+	[self processJSONDataInBackground:data 
+				 withCallbackSelector:callback 
+				   backgroundSelector:nil 
+						errorSelector:nil 
+					   readingOptions:options];
+
 }
-   
+
+- (void) processJSONDataInBackground:(NSData *)data withCallbackSelector:(SEL)callback backgroundSelector:(SEL)backgroundProcessor readingOptions:(NSJSONReadingOptions)options{
+	
+	[self processJSONDataInBackground:data 
+				 withCallbackSelector:callback 
+				   backgroundSelector:backgroundProcessor 
+						errorSelector:nil 
+					   readingOptions:options];
+
+}
+
+- (void) processJSONDataInBackground:(NSData *)data withCallbackSelector:(SEL)callback backgroundSelector:(SEL)backgroundProcessor errorSelector:(SEL)errroSelector{
+	
+	[self processJSONDataInBackground:data 
+				 withCallbackSelector:callback 
+				   backgroundSelector:backgroundProcessor 
+						errorSelector:errroSelector 
+					   readingOptions:0];
+
+}
+
+
+- (void) processJSONDataInBackground:(NSData *)data 
+				withCallbackSelector:(SEL)callback 
+				  backgroundSelector:(SEL)backgroundProcessor 
+					   errorSelector:(SEL)errroSelector 
+					  readingOptions:(NSJSONReadingOptions)options{
+	
+	
+	NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+	
+	[dict setObject:data forKey:@"data"];
+	[dict setObject:[NSNumber numberWithUnsignedInt:options] forKey:@"flags"];
+	
+	if(callback) [dict setObject:NSStringFromSelector(callback) forKey:@"callback"];
+	if(backgroundProcessor) [dict setObject:NSStringFromSelector(backgroundProcessor) forKey:@"backgroundProcessor"];
+	if(errroSelector) [dict setObject:NSStringFromSelector(errroSelector) forKey:@"errroSelector"];
+
+	
+	[self performSelectorInBackground:@selector(_processJSONData:) withObject:dict];
+
+	
+}
+
+
+- (void) _processJSONData:(NSDictionary*)dict{
+	@autoreleasepool {
+		NSError *error = nil;
+		
+		NSData *data = [dict objectForKey:@"data"];
+		NSUInteger options = [[dict objectForKey:@"flags"] unsignedIntValue];
+		
+		NSString *callback = [dict objectForKey:@"callback"];
+		NSString *background = [dict objectForKey:@"backgroundProcessor"];
+		NSString *eSelector = [dict objectForKey:@"errroSelector"];
+		
+		id object = [NSJSONSerialization JSONObjectWithData:data options:options error:&error];
+		
+
+		
+		if(error){
+			if(eSelector) [self performSelector:NSSelectorFromString(eSelector) withObject:error];
+		}else{
+			if(background) object = [self performSelector:NSSelectorFromString(background) withObject:object];
+			[self performSelectorOnMainThread:NSSelectorFromString(callback) withObject:object waitUntilDone:NO];
+		}
+		
+		
+	}
+}
+
+
+
+
+#pragma mark - PROPERTIES
+- (UIView*) loadingView{
+	if(_loadingView==nil){
+		_loadingView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 44)];
+		_loadingView.backgroundColor = [UIColor clearColor];
+		_loadingView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+		
+		UIActivityIndicatorView *act = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+		act.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
+		
+		act.center = _loadingView.center;
+		[act startAnimating];
+		[_loadingView addSubview:act];
+	}
+	return _loadingView;
+}
+
+
 @end
