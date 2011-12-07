@@ -30,7 +30,6 @@
  */
 
 #import <Foundation/Foundation.h>
-#import <TapkuLibrary/TapkuLibrary.h>
 
 
 @interface TKImageCache : NSCache {

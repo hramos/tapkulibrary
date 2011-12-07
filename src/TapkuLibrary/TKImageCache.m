@@ -30,7 +30,6 @@
  */
 
 #import "TKImageCache.h"
-#import <TapkuLibrary/TapkuLibrary.h>
 
 
 #pragma mark -
